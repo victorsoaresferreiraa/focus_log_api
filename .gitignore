@@ -49,3 +49,7 @@ logs/
 dist/
 build/
 *.egg-info/
+
+# Visual Studio files
+.vs/
+*.vsidx
