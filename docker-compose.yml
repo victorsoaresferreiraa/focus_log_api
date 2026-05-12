@@ -1,0 +1,43 @@
+# =============================================================================
+# DOCKER COMPOSE — Focus Log API
+# =============================================================================
+# Docker Compose orquestra múltiplos containers.
+# Aqui temos apenas a aplicação Django, mas em produção teríamos
+# também um container de banco de dados (PostgreSQL), cache (Redis), etc.
+#
+# Para iniciar: docker compose up
+# Para parar:   docker compose down
+# =============================================================================
+
+version: '3.9'
+
+services:
+  # ============ Serviço principal: API Django ============
+  api:
+    # Constrói a imagem usando o Dockerfile deste diretório
+    build: .
+
+    # Nome amigável para o container
+    container_name: focus_log_api
+
+    # Mapeia a porta 8000 do container para 8000 do host
+    # Formato: "porta_host:porta_container"
+    ports:
+      - "8000:8000"
+
+    # Variáveis de ambiente — em produção, use secrets ou .env separado
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-dev-key-change-in-production}
+      - DEBUG=${DEBUG:-True}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+
+    # Monta o código local no container — mudanças refletem instantaneamente
+    # (Apenas em desenvolvimento! Em produção, o código está dentro da imagem)
+    volumes:
+      - .:/app
+
+    # Comando com auto-reload para desenvolvimento
+    command: python manage.py runserver 0.0.0.0:8000
+
+    # Reinicia automaticamente se o container cair
+    restart: unless-stopped

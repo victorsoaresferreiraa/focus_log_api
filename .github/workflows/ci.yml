@@ -1,0 +1,107 @@
+# =============================================================================
+# CI/CD — GitHub Actions — Focus Log API
+# =============================================================================
+#
+# Este arquivo define o pipeline de Integração Contínua (CI).
+# Toda vez que alguém faz push ou abre um Pull Request, o GitHub
+# automaticamente executa esta "receita" de passos.
+#
+# Por que CI é importante?
+#   - Garante que o código novo não quebrou o que funcionava
+#   - Padrão obrigatório em times profissionais
+#   - "Se não tem teste automatizado, não funciona" — lei do dev
+# =============================================================================
+
+name: CI — Testes e Qualidade de Código
+
+# Quando este pipeline é executado
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # ===========================================================================
+  # JOB: Testes automatizados
+  # ===========================================================================
+  tests:
+    name: Executar testes
+    runs-on: ubuntu-latest  # Executa em uma VM Ubuntu no GitHub
+
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.12']  # Testa em múltiplas versões
+
+    steps:
+      # 1. Baixar o código do repositório
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # 2. Instalar Python
+      - name: Configurar Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # 3. Cache de dependências (acelera builds futuros)
+      - name: Cache das dependências pip
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      # 4. Instalar dependências
+      - name: Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install coverage
+
+      # 5. Configurar variáveis de ambiente para o CI
+      - name: Configurar variáveis de ambiente
+        run: |
+          echo "SECRET_KEY=ci-test-secret-key-not-for-production" >> $GITHUB_ENV
+          echo "DEBUG=True" >> $GITHUB_ENV
+          echo "ALLOWED_HOSTS=localhost,127.0.0.1" >> $GITHUB_ENV
+
+      # 6. Rodar migrations
+      - name: Aplicar migrations
+        run: python manage.py migrate
+
+      # 7. Executar testes com relatório de cobertura
+      - name: Executar testes
+        run: |
+          coverage run manage.py test registros --verbosity=2
+          coverage report --min-coverage=70
+          coverage xml
+
+      # 8. Fazer upload do relatório de cobertura (opcional)
+      - name: Upload cobertura para Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+        continue-on-error: true  # Não falha o CI se o Codecov estiver fora
+
+  # ===========================================================================
+  # JOB: Qualidade de código (linting)
+  # ===========================================================================
+  lint:
+    name: Verificar qualidade do código
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Instalar ferramentas de lint
+        run: pip install flake8
+
+      - name: Executar flake8 (verificação de estilo)
+        run: |
+          # E501: ignora linhas longas (já que temos muitos comentários)
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics

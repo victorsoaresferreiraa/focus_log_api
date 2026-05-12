@@ -1,0 +1,51 @@
+# =============================================================================
+# .gitignore — Focus Log API
+# =============================================================================
+# Arquivos e pastas que NUNCA devem ir para o repositório Git.
+# Segredos, arquivos gerados automaticamente e dependências locais.
+# =============================================================================
+
+# --- Segredos e configurações locais ---
+.env
+*.env
+
+# --- Banco de dados local ---
+*.sqlite3
+db.sqlite3
+
+# --- Python: bytecode compilado ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# --- Ambientes virtuais ---
+venv/
+env/
+.venv/
+.env/
+
+# --- Django: arquivos estáticos coletados ---
+/staticfiles/
+/mediafiles/
+
+# --- Editores e IDEs ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# --- Cobertura de testes ---
+.coverage
+htmlcov/
+coverage.xml
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Distribuição Python ---
+dist/
+build/
+*.egg-info/

@@ -1,0 +1,9 @@
+# Força o Git a normalizar todas as quebras de linha como LF no repositório
+* text=auto
+
+# Garante que scripts de configuração e Docker usem sempre LF (padrão Linux)
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.txt text eol=lf

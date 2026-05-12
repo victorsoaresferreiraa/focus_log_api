@@ -1,0 +1,15 @@
+# =============================================================================
+# DEPENDÊNCIAS — Focus Log API
+# =============================================================================
+# Versões fixadas (pin) para builds reprodutíveis.
+# Em prod, sempre use versões específicas — nunca "django>=4.0"
+# =============================================================================
+
+# Framework web principal
+Django==5.0.6
+
+# API REST para Django — validação, serialização, autenticação, etc.
+djangorestframework==3.15.2
+
+# Lê variáveis de ambiente de arquivos .env
+python-decouple==3.8
